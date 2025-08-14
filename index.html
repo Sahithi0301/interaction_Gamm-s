@@ -515,7 +515,7 @@
                }
 
                // Construct the file path based on your actual naming pattern
-               const fileName = `combined_${currentTask.toLowerCase()}_all_${contrastName}_${regionName}.png`;
+               const fileName = `combined_${currentTask}_all_${contrastName}_${regionName}.png`;
                const filePath = `images/${folderName}/${fileName}`;
                
                console.log('Looking for image:', fileName);
@@ -855,7 +855,7 @@
                            <div style="padding: 20px; background: rgba(255,255,255,0.15); border-radius: 12px; font-size: 0.9rem; text-align: left; font-family: monospace;">
                                <div style="margin-bottom: 10px;"><strong>Expected path:</strong></div>
                                <div>images/${expectedFolder}/</div>
-                               <div>combined_${currentTask.toLowerCase()}_all_${expectedContrast}_${regionName}.png</div>
+                               <div>combined_${currentTask}_all_${expectedContrast}_${regionName}.png</div>
                            </div>
                        </div>
                    </div>
