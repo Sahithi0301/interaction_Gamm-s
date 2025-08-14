@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>GAMM Interactions</title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+           background: linear-gradient(135deg, #f8f7f5 0%, #f1f0eb 100%);
+           min-height: 100vh;
+           transition: all 0.3s ease;
+       }
+
+       .container {
+           max-width: 1200px;
+           margin: 0 auto;
+           padding: 20px;
+       }
+
+       .header {
+           text-align: center;
+           margin-bottom: 40px;
+           padding: 40px 0;
+       }
+
+       .header h1 {
+           font-size: 2.5rem;
+           color: #1e293b;
+           margin-bottom: 10px;
+           font-weight: 300;
+       }
+
+       .header p {
+           color: #64748b;
+           font-size: 1.1rem;
+       }
+
+       .breadcrumb {
+           background: white;
+           padding: 15px 25px;
+           border-radius: 12px;
+           box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+           margin-bottom: 30px;
+           font-size: 14px;
+           color: #64748b;
+       }
+
+       .breadcrumb span {
+           margin: 0 10px;
+       }
+
+       .breadcrumb .current {
+           color: #181819;
+           font-weight: 500;
+       }
+
+       .cards-grid {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+           gap: 35px;
+           margin-bottom: 50px;
+       }
+
+       .card {
+           background: white;
+           border-radius: 16px;
+           padding: 30px;
+           box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+           cursor: pointer;
+           transition: all 0.3s ease;
+           border: 2px solid transparent;
+           position: relative;
+           overflow: hidden;
+       }
+
+       .card::before {
+           content: '';
+           position: absolute;
+           top: 0;
+           left: 0;
+           right: 0;
+           height: 4px;
+           background: linear-gradient(90deg, #ede4d3);
+           transform: scaleX(0);
+           transform-origin: left;
+           transition: transform 0.3s ease;
+       }
+
+       .card:hover::before {
+           transform: scaleX(1);
+       }
+
+       .card:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+           border-color: #e2e8f0;
+       }
+
+       .card h3 {
+           font-size: 1.5rem;
+           color: #1e293b;
+           margin-bottom: 15px;
+           font-weight: 600;
+       }
+
+       .card p {
+           color: #64748b;
+           line-height: 1.6;
+           margin-bottom: 20px;
+       }
+
+       .card-meta {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           font-size: 0.9rem;
+           color: #94a3b8;
+       }
+
+       .back-btn {
+           background: white;
+           border: 2px solid #e2e8f0;
+           padding: 12px 24px;
+           border-radius: 8px;
+           cursor: pointer;
+           font-size: 14px;
+           color: #090909;
+           transition: all 0.2s ease;
+           margin-bottom: 20px;
+           display: inline-flex;
+           align-items: center;
+           gap: 8px;
+       }
+
+       .back-btn:hover {
+           background: #f8fafc;
+           border-color: #cbd5e1;
+           color: #1a1b1d;
+       }
+
+       .contrast-list {
+           background: white;
+           border-radius: 12px;
+           padding: 25px;
+           box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+           margin-bottom: 20px;
+       }
+
+       .contrast-item {
+           padding: 12px 16px;
+           border-radius: 8px;
+           cursor: pointer;
+           transition: all 0.2s ease;
+           margin-bottom: 8px;
+           border: 1px solid transparent;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+       }
+
+       .contrast-item:hover {
+           background: #f8fafc;
+           border-color: #e2e8f0;
+       }
+
+       .contrast-item.selected {
+           background: #eff6ff;
+           border-color: #3b4047;
+           color: #3d3d40;
+       }
+
+       .graph-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+       .graph-container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 30px 30px 30px;
+            height: 98vh;
+            width: 98vw;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+       .graph-container h2 {
+           margin: 0 0 30px 0;
+           padding: 0 40px 0 0;
+           font-size: 1.8rem;
+           color: #1e293b;
+           line-height: 1.3;
+           word-wrap: break-word;
+       }
+
+       .close-btn {
+           position: absolute;
+           top: 20px;
+           right: 20px;
+           background: #f1f5f9;
+           border: none;
+           width: 40px;
+           height: 40px;
+           border-radius: 50%;
+           cursor: pointer;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           font-size: 18px;
+           color: #64748b;
+           transition: all 0.2s ease;
+           z-index: 10;
+       }
+
+       .close-btn:hover {
+           background: #e2e8f0;
+           color: #1e293b;
+       }
+
+           .graph-placeholder {
+           flex: 1;
+           background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+           border-radius: 12px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: #64748b;
+           font-size: 1.1rem;
+           border: 2px dashed #cbd5e1;
+           min-height: 400px;
+       }
+
+       .slide-selector {
+           display: flex;
+           gap: 20px;
+           justify-content: center;
+           margin-bottom: 30px;
+       }
+
+       .slide-btn {
+           background: white;
+           border: 2px solid #e2e8f0;
+           padding: 15px 30px;
+           border-radius: 12px;
+           cursor: pointer;
+           font-size: 1rem;
+           color: #232425;
+           transition: all 0.3s ease;
+           font-weight: 500;
+       }
+
+       .slide-btn.active {
+           background: #535456;
+           border-color: #444547;
+           color: white;
+           box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+       }
+
+       .hidden {
+           display: none;
+       }
+
+       .fade-in {
+           animation: fadeIn 0.5s ease-in;
+       }
+
+       @keyframes fadeIn {
+           from { opacity: 0; transform: translateY(20px); }
+           to { opacity: 1; transform: translateY(0); }
+       }
+
+       .loading {
+           display: inline-block;
+           animation: spin 1s linear infinite;
+       }
+
+       @keyframes spin {
+           0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+       }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <!-- Header -->
+       <div class="header">
+           <h1>GAMM Interactions</h1>
+           <p>Explore Nback, SST, and MID task interactions</p>
+       </div>
+
+       <!-- Breadcrumb -->
+       <div class="breadcrumb" id="breadcrumb">
+           <span class="current">Home</span>
+       </div>
+
+       <!-- Home Page - Task Selection -->
+       <div id="home-page">
+           <div class="cards-grid">
+               <div class="card" onclick="selectTask('nBack')">
+                   <h3>Nback Task</h3>
+                   <p>Working memory task with cognitive load manipulation. Includes performance and sex interaction analyses.</p>
+                   <div class="card-meta">
+                       <span>2 Interaction Types</span>
+                   </div>
+               </div>
+
+               <div class="card" onclick="selectTask('SST')">
+                   <h3>SST Task</h3>
+                   <p>Stop Signal Task measuring inhibitory control. Analyze performance and sex-based differences.</p>
+                   <div class="card-meta">
+                       <span>2 Interaction Types</span>
+                   </div>
+               </div>
+
+               <div class="card" onclick="selectTask('MID')">
+                   <h3>MID Task</h3>
+                   <p>Monetary Incentive Delay task examining reward processing and anticipation responses.</p>
+                   <div class="card-meta">
+                       <span>Sex Interaction</span>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+       <!-- Task Page - Interaction Selection -->
+       <div id="task-page" class="hidden">
+           <button class="back-btn" onclick="goHome()">←</button>
+          
+           <div class="slide-selector" id="interaction-selector">
+               <!-- Will be populated dynamically -->
+           </div>
+
+           <div class="cards-grid" id="interaction-cards">
+               <!-- Will be populated dynamically -->
+           </div>
+       </div>
+
+       <!-- Contrast Page -->
+       <div id="contrast-page" class="hidden">
+           <button class="back-btn" onclick="goBackToTask()">←</button>
+          
+           <div class="contrast-list">
+               <h3 id="contrast-title">Select a Contrast</h3>
+               <div id="contrast-items">
+                   <!-- Will be populated with 148 contrasts -->
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- Graph Overlay -->
+   <div class="graph-overlay" id="graph-overlay">
+       <div class="graph-container">
+           <button class="close-btn" onclick="closeGraph()">×</button>
+           <h2 id="graph-title">Contrast Visualization</h2>
+           <div class="graph-placeholder" id="graph-content">
+               Graph will be displayed here
+               <br><small>Contrast analysis visualization</small>
+           </div>
+       </div>
+   </div>
+
+   <script>
+       let currentTask = '';
+       let currentInteraction = '';
+       let selectedContrast = '';
+
+       const taskData = {
+           'nBack': {
+               interactions: ['Performance Interaction', 'Sex Interaction'],
+               contrasts: {
+                   'Performance Interaction': [
+                       '0Back',
+                       '2Back'
+                   ],
+                   'Sex Interaction': [
+                       '0Back',
+                       '2Back',
+                       '2Back vs 0Back',
+                       'Faces vs Places'
+                   ]
+               }
+           },
+           'SST': {
+               interactions: ['Performance Interaction', 'Sex Interaction'],
+               contrasts: {
+                   'Performance Interaction': [
+                       'Correct Stop vs Correct Go',
+                       'Incorrect Stop vs Correct Go'
+                   ],
+                   'Sex Interaction': [
+                       'Correct Stop vs Correct Go',
+                       'Incorrect Stop vs Correct Go'
+                   ]
+               }
+           },
+           'MID': {
+               interactions: ['Sex Interaction'],
+               contrasts: {
+                   'Sex Interaction': [
+                       'Anticipation of Large Reward vs Neutral',
+                       'Anticipation of Loss vs Neutral',
+                       'Loss Positive vs Negative Feedback',
+                       'Reward Positive vs Negative Feedback'
+                   ]
+               }
+           }
+       };
+
+       // Map folder names based on your actual structure
+       function getFolderName(task, interaction, contrast) {
+           const folderMapping = {
+               'nBack': {
+                   'Performance Interaction': {
+                       '0Back': 'combined_nBack_all_0_back1_perf_interaction',
+                       '2Back': 'combined_nBack_all_2_back1_perf_interaction'
+                   },
+                   'Sex Interaction': {
+                       '0Back': 'combined_nBack_all_0_back1_sex_interaction',
+                       '2Back': 'combined_nBack_all_2_back1_sex_interaction',
+                       '2Back vs 0Back': 'combined_nBack_all_2_back_versus_0_back1_sex_interaction',
+                       'Faces vs Places': 'combined_nBack_all_face_versus_place1_sex_interaction'
+                   }
+               },
+               'SST': {
+                   'Performance Interaction': {
+                       'Correct Stop vs Correct Go': 'combined_SST_all_correct_stop_versus_correct_go1_perf_interaction',
+                       'Incorrect Stop vs Correct Go': 'combined_SST_all_incorrect_stop_versus_correct_go1_perf_interaction'
+                   },
+                   'Sex Interaction': {
+                       'Correct Stop vs Correct Go': 'combined_SST_all_correct_stop_versus_correct_go1_sex_interaction',
+                       'Incorrect Stop vs Correct Go': 'combined_SST_all_incorrect_stop_versus_correct_go1_sex_interaction'
+                   }
+               },
+               'MID': {
+                   'Sex Interaction': {
+                       'Anticipation of Large Reward vs Neutral': 'combined_MID_all_anticipation_of_large_reward_versus_neutral1_sex_interaction',
+                       'Anticipation of Loss vs Neutral': 'combined_MID_all_anticipation_of_loss_versus_neutral1_sex_interaction',
+                       'Loss Positive vs Negative Feedback': 'combined_MID_all_loss_positive_versus_negative_feedback1_sex_interaction',
+                       'Reward Positive vs Negative Feedback': 'combined_MID_all_reward_positive_versus_negative_feedback1_sex_interaction'
+                   }
+               }
+           };
+
+           return folderMapping[task]?.[interaction]?.[contrast] || '';
+       }
+
+       // Get the contrast name for file naming - this extracts the key part
+       function getContrastFileName(task, interaction, contrast) {
+           const contrastMapping = {
+               'nBack': {
+                   'Performance Interaction': {
+                       '0Back': '0_back',
+                       '2Back': '2_back'
+                   },
+                   'Sex Interaction': {
+                       '0Back': '0_back',
+                       '2Back': '2_back', 
+                       '2Back vs 0Back': '2_back_versus_0_back',
+                       'Faces vs Places': 'face_versus_place'
+                   }
+               },
+               'SST': {
+                   'Performance Interaction': {
+                       'Correct Stop vs Correct Go': 'correct_stop_versus_correct_go',
+                       'Incorrect Stop vs Correct Go': 'incorrect_stop_versus_correct_go'
+                   },
+                   'Sex Interaction': {
+                       'Correct Stop vs Correct Go': 'correct_stop_versus_correct_go',
+                       'Incorrect Stop vs Correct Go': 'incorrect_stop_versus_correct_go'
+                   }
+               },
+               'MID': {
+                   'Sex Interaction': {
+                       'Anticipation of Large Reward vs Neutral': 'anticipation_of_large_reward_versus_neutral',
+                       'Anticipation of Loss vs Neutral': 'anticipation_of_loss_versus_neutral',
+                       'Loss Positive vs Negative Feedback': 'loss_positive_versus_negative_feedback',
+                       'Reward Positive vs Negative Feedback': 'reward_positive_versus_negative_feedback'
+                   }
+               }
+           };
+
+           return contrastMapping[task]?.[interaction]?.[contrast] || '';
+       }
+
+       async function getImageData(regionName) {
+           try {
+               // Get the folder name based on current selection
+               const folderName = getFolderName(currentTask, currentInteraction, selectedContrast);
+               const contrastName = getContrastFileName(currentTask, currentInteraction, selectedContrast);
+               
+               if (!folderName || !contrastName) {
+                   console.error('No folder/contrast mapping found for:', currentTask, currentInteraction, selectedContrast);
+                   return null;
+               }
+
+               // Construct the file path based on your actual naming pattern
+               const fileName = `combined_${currentTask.toLowerCase()}_all_${contrastName}_${regionName}.png`;
+               const filePath = `images/${folderName}/${fileName}`;
+               
+               console.log('Looking for image:', fileName);
+               console.log('Full path:', filePath);
+
+               // For web-accessible images, return the path directly
+               return filePath;
+               
+           } catch (error) {
+               console.error('Error constructing image path:', error);
+               return null;
+           }
+       }
+
+       function updateBreadcrumb(path) {
+           const breadcrumb = document.getElementById('breadcrumb');
+           breadcrumb.innerHTML = path;
+       }
+
+       function selectTask(task) {
+           currentTask = task;
+           document.getElementById('home-page').classList.add('hidden');
+           document.getElementById('task-page').classList.remove('hidden');
+           document.getElementById('task-page').classList.add('fade-in');
+          
+           updateBreadcrumb(`<span onclick="goHome()" style="cursor:pointer;color:#181819;">Home</span> <span>></span> <span class="current">${task}</span>`);
+          
+           setupInteractionSelector();
+           showInteractionCards();
+       }
+
+       function setupInteractionSelector() {
+           const selector = document.getElementById('interaction-selector');
+           const interactions = taskData[currentTask].interactions;
+          
+           selector.innerHTML = '';
+           interactions.forEach((interaction, index) => {
+               const btn = document.createElement('div');
+               btn.className = `slide-btn ${index === 0 ? 'active' : ''}`;
+               btn.textContent = interaction;
+               btn.onclick = () => selectInteraction(interaction);
+               selector.appendChild(btn);
+           });
+          
+           // Set first interaction as default
+           currentInteraction = interactions[0];
+       }
+
+       function selectInteraction(interaction) {
+           currentInteraction = interaction;
+          
+           // Update active button
+           document.querySelectorAll('.slide-btn').forEach(btn => {
+               btn.classList.remove('active');
+               if (btn.textContent === interaction) {
+                   btn.classList.add('active');
+               }
+           });
+          
+           showInteractionCards();
+       }
+
+       function showInteractionCards() {
+           const cardsContainer = document.getElementById('interaction-cards');
+           const contrasts = taskData[currentTask].contrasts[currentInteraction];
+          
+           cardsContainer.innerHTML = '';
+          
+           contrasts.forEach(contrast => {
+               const card = document.createElement('div');
+               card.className = 'card';
+               card.onclick = () => selectContrast(contrast);
+              
+               card.innerHTML = `
+                   <h3>${formatContrastName(contrast)}</h3>
+                   <p>View detailed analysis and visualization for this contrast.</p>
+                   <div class="card-meta">
+                       <span>148 ROI's</span>
+                       <span>Click to explore</span>
+                   </div>
+               `;
+              
+               cardsContainer.appendChild(card);
+           });
+       }
+
+       function selectContrast(contrast) {
+           selectedContrast = contrast;
+           document.getElementById('task-page').classList.add('hidden');
+           document.getElementById('contrast-page').classList.remove('hidden');
+           document.getElementById('contrast-page').classList.add('fade-in');
+          
+           updateBreadcrumb(`<span onclick="goHome()" style="cursor:pointer;color:#181819;">Home</span> <span>></span> <span onclick="goBackToTask()" style="cursor:pointer;color:#181819;">${currentTask}</span> <span>></span> <span class="current">${formatContrastName(contrast)}</span>`);
+          
+           document.getElementById('contrast-title').textContent = `${formatContrastName(contrast)} - Select Brain Region`;
+          
+           setupContrastList();
+       }
+
+       function setupContrastList() {
+           const container = document.getElementById('contrast-items');
+           container.innerHTML = '';
+          
+           // Brain region names based on your uploaded file structure
+           const brainRegions = [
+               'left_hemisphere_angular_gyrus',
+               'left_hemisphere_anterior_occipital_sulcus_and_preoccipital_notch',
+               'left_hemisphere_anterior_part_of_the_cingulate_gyrus_and_sulcus',
+               'left_hemisphere_anterior_segment_of_the_circular_sulcus_of_the_insula',
+               'left_hemisphere_anterior_transverse_collateral_sulcus',
+               'left_hemisphere_anterior_transverse_temporal_gyrus',
+               'left_hemisphere_calcarine_sulcus',
+               'left_hemisphere_central_sulcus',
+               'left_hemisphere_cuneus',
+               'left_hemisphere_fronto-marginal_gyrus_and_sulcus',
+               'left_hemisphere_gyrus_rectus',
+               'left_hemisphere_horizontal_ramus_of_the_anterior_segment_of_the_lateral_sulcus',
+               'left_hemisphere_inferior_frontal_sulcus',
+               'left_hemisphere_inferior_occipital_gyrus_and_sulcus',
+               'left_hemisphere_inferior_part_of_the_precentral_sulcus',
+               'left_hemisphere_inferior_segment_of_the_circular_sulcus_of_the_insula',
+               'left_hemisphere_inferior_temporal_gyrus',
+               'left_hemisphere_inferior_temporal_sulcus',
+               'left_hemisphere_intraparietal_sulcus_and_transverse_parietal_sulci',
+               'left_hemisphere_lateral_aspect_of_the_superior_temporal_gyrus',
+               'left_hemisphere_lateral_occipito-temporal_gyrus',
+               'left_hemisphere_lateral_occipito-temporal_sulcus',
+               'left_hemisphere_lateral_orbital_sulcus',
+               'left_hemisphere_lingual_gyrus',
+               'left_hemisphere_long_insular_gyrus_and_central_sulcus_of_the_insula',
+               'left_hemisphere_marginal_branch_of_the_cingulate_sulcus',
+               'left_hemisphere_medial_occipito-temporal_sulcus_and_lingual_sulcus',
+               'left_hemisphere_medial_orbital_sulcus',
+               'left_hemisphere_middle-anterior_part_of_the_cingulate_gyrus_and_sulcus',
+               'left_hemisphere_middle-posterior_part_of_the_cingulate_gyrus_and_sulcus',
+               'left_hemisphere_middle_frontal_gyrus',
+               'left_hemisphere_middle_frontal_sulcus',
+               'left_hemisphere_middle_occipital_gyrus',
+               'left_hemisphere_middle_occipital_sulcus_and_lunatus_sulcus',
+               'left_hemisphere_middle_temporal_gyrus',
+               'left_hemisphere_occipital_pole',
+               'left_hemisphere_opercular_part_of_the_inferior_frontal_gyrus',
+               'left_hemisphere_orbital_gyri',
+               'left_hemisphere_orbital_part_of_the_inferior_frontal_gyrus',
+               'left_hemisphere_orbital_sulci',
+               'left_hemisphere_paracentral_lobule_and_sulcus',
+               'left_hemisphere_parahippocampal_gyrus',
+               'left_hemisphere_parieto-occipital_sulcus',
+               'left_hemisphere_pericallosal_sulcus',
+               'left_hemisphere_planum_polare_of_the_superior_temporal_gyrus',
+               'left_hemisphere_planum_temporale',
+               'left_hemisphere_postcentral_gyrus',
+               'left_hemisphere_postcentral_sulcus',
+               'left_hemisphere_posterior-dorsal_part_of_the_cingulate_gyrus',
+               'left_hemisphere_posterior-ventral_part_of_the_cingulate_gyrus',
+               'left_hemisphere_posterior_ramus_of_the_lateral_sulcus',
+               'left_hemisphere_posterior_transverse_collateral_sulcus',
+               'left_hemisphere_precentral_gyrus',
+               'left_hemisphere_precuneus',
+               'left_hemisphere_short_insular_gyri',
+               'left_hemisphere_subcentral_gyrus_and_sulci',
+               'left_hemisphere_subcallosal_gyrus',
+               'left_hemisphere_suborbital_sulcus',
+               'left_hemisphere_subparietal_sulcus',
+               'left_hemisphere_sulcus_intermedius_primus',
+               'left_hemisphere_superior_frontal_gyrus',
+               'left_hemisphere_superior_frontal_sulcus',
+               'left_hemisphere_superior_occipital_gyrus',
+               'left_hemisphere_superior_occipital_sulcus_and_transverse_occipital_sulcus',
+               'left_hemisphere_superior_parietal_lobule',
+               'left_hemisphere_superior_part_of_the_precentral_sulcus',
+               'left_hemisphere_superior_segment_of_the_circular_sulcus_of_the_insula',
+               'left_hemisphere_superior_temporal_sulcus',
+               'left_hemisphere_supramarginal_gyrus',
+               'left_hemisphere_temporal_pole',
+               'left_hemisphere_transverse_frontopolar_gyri_and_sulci',
+               'left_hemisphere_transverse_temporal_sulcus',
+               'left_hemisphere_triangular_part_of_the_inferior_frontal_gyrus',
+               'left_hemisphere_vertical_ramus_of_the_anterior_segment_of_the_lateral_sulcus',
+               'right_hemisphere_angular_gyrus',
+               'right_hemisphere_anterior_occipital_sulcus_and_preoccipital_notch',
+               'right_hemisphere_anterior_part_of_the_cingulate_gyrus_and_sulcus',
+               'right_hemisphere_anterior_segment_of_the_circular_sulcus_of_the_insula',
+               'right_hemisphere_anterior_transverse_collateral_sulcus',
+               'right_hemisphere_anterior_transverse_temporal_gyrus',
+               'right_hemisphere_calcarine_sulcus',
+               'right_hemisphere_central_sulcus',
+               'right_hemisphere_cuneus',
+               'right_hemisphere_fronto-marginal_gyrus_and_sulcus',
+               'right_hemisphere_gyrus_rectus',
+               'right_hemisphere_horizontal_ramus_of_the_anterior_segment_of_the_lateral_sulcus',
+               'right_hemisphere_inferior_frontal_sulcus',
+               'right_hemisphere_inferior_occipital_gyrus_and_sulcus',
+               'right_hemisphere_inferior_part_of_the_precentral_sulcus',
+               'right_hemisphere_inferior_segment_of_the_circular_sulcus_of_the_insula',
+               'right_hemisphere_inferior_temporal_gyrus',
+               'right_hemisphere_inferior_temporal_sulcus',
+               'right_hemisphere_intraparietal_sulcus_and_transverse_parietal_sulci',
+               'right_hemisphere_lateral_aspect_of_the_superior_temporal_gyrus',
+               'right_hemisphere_lateral_occipito-temporal_gyrus',
+               'right_hemisphere_lateral_occipito-temporal_sulcus',
+               'right_hemisphere_lateral_orbital_sulcus',
+               'right_hemisphere_lingual_gyrus',
+               'right_hemisphere_long_insular_gyrus_and_central_sulcus_of_the_insula',
+               'right_hemisphere_marginal_branch_of_the_cingulate_sulcus',
+               'right_hemisphere_medial_occipito-temporal_sulcus_and_lingual_sulcus',
+               'right_hemisphere_medial_orbital_sulcus',
+               'right_hemisphere_middle-anterior_part_of_the_cingulate_gyrus_and_sulcus',
+               'right_hemisphere_middle-posterior_part_of_the_cingulate_gyrus_and_sulcus',
+               'right_hemisphere_middle_frontal_gyrus',
+               'right_hemisphere_middle_frontal_sulcus',
+               'right_hemisphere_middle_occipital_gyrus',
+               'right_hemisphere_middle_occipital_sulcus_and_lunatus_sulcus',
+               'right_hemisphere_middle_temporal_gyrus',
+               'right_hemisphere_occipital_pole',
+               'right_hemisphere_opercular_part_of_the_inferior_frontal_gyrus',
+               'right_hemisphere_orbital_gyri',
+               'right_hemisphere_orbital_part_of_the_inferior_frontal_gyrus',
+               'right_hemisphere_orbital_sulci',
+               'right_hemisphere_paracentral_lobule_and_sulcus',
+               'right_hemisphere_parahippocampal_gyrus',
+               'right_hemisphere_parieto-occipital_sulcus',
+               'right_hemisphere_pericallosal_sulcus',
+               'right_hemisphere_planum_polare_of_the_superior_temporal_gyrus',
+               'right_hemisphere_planum_temporale',
+               'right_hemisphere_postcentral_gyrus',
+               'right_hemisphere_postcentral_sulcus',
+               'right_hemisphere_posterior-dorsal_part_of_the_cingulate_gyrus',
+               'right_hemisphere_posterior-ventral_part_of_the_cingulate_gyrus',
+               'right_hemisphere_posterior_ramus_of_the_lateral_sulcus',
+               'right_hemisphere_posterior_transverse_collateral_sulcus',
+               'right_hemisphere_precentral_gyrus',
+               'right_hemisphere_precuneus',
+               'right_hemisphere_short_insular_gyri',
+               'right_hemisphere_subcentral_gyrus_and_sulci',
+               'right_hemisphere_subcallosal_gyrus',
+               'right_hemisphere_suborbital_sulcus',
+               'right_hemisphere_subparietal_sulcus',
+               'right_hemisphere_sulcus_intermedius_primus',
+               'right_hemisphere_superior_frontal_gyrus',
+               'right_hemisphere_superior_frontal_sulcus',
+               'right_hemisphere_superior_occipital_gyrus',
+               'right_hemisphere_superior_occipital_sulcus_and_transverse_occipital_sulcus',
+               'right_hemisphere_superior_parietal_lobule',
+               'right_hemisphere_superior_part_of_the_precentral_sulcus',
+               'right_hemisphere_superior_segment_of_the_circular_sulcus_of_the_insula',
+               'right_hemisphere_superior_temporal_sulcus',
+               'right_hemisphere_supramarginal_gyrus',
+               'right_hemisphere_temporal_pole',
+               'right_hemisphere_transverse_frontopolar_gyri_and_sulci',
+               'right_hemisphere_transverse_temporal_sulcus',
+               'right_hemisphere_triangular_part_of_the_inferior_frontal_gyrus',
+               'right_hemisphere_vertical_ramus_of_the_anterior_segment_of_the_lateral_sulcus'
+           ];
+
+           brainRegions.forEach((region, index) => {
+               const item = document.createElement('div');
+               item.className = 'contrast-item';
+               item.innerHTML = `
+                   <span>${formatRegionName(region)}</span>
+                   <span>→</span>
+               `;
+               item.onclick = () => showGraph(region, index + 1);
+               container.appendChild(item);
+           });
+       }
+
+       async function showGraph(regionName, regionIndex) {
+           // Update selected item
+           document.querySelectorAll('.contrast-item').forEach(item => {
+               item.classList.remove('selected');
+           });
+           event.target.closest('.contrast-item').classList.add('selected');
+          
+           // Show graph overlay
+           document.getElementById('graph-title').textContent =
+               `${formatContrastName(selectedContrast)} - ${formatRegionName(regionName)}`;
+          
+           // Create the graph content with loading state
+           const graphContent = document.getElementById('graph-content');
+           
+           // Show loading state
+           graphContent.innerHTML = `
+               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                   <div style="text-align: center;">
+                       <div class="loading" style="font-size: 2rem; margin-bottom: 20px;">⟳</div>
+                       <p style="color: #64748b; font-size: 1.1rem;">Loading brain region analysis...</p>
+                   </div>
+               </div>
+           `;
+           
+           document.getElementById('graph-overlay').style.display = 'flex';
+           document.body.style.overflow = 'hidden';
+
+           // Try to load the image
+           const imagePath = await getImageData(regionName);
+           
+           if (imagePath) {
+               // Test if image exists by trying to load it
+               const img = new Image();
+               img.onload = function() {
+                   // Image loaded successfully
+                   graphContent.innerHTML = `
+                       <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                           <div style="background: #f8fafc; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 95%; max-height: 85%; overflow: auto;">
+                               <img src="${imagePath}"
+                                   style="display: block; max-width: 100%; height: auto; border-radius: 12px;"
+                                   alt="Statistical Analysis for ${formatRegionName(regionName)}">
+                           </div>
+                       </div>
+                   `;
+               };
+               
+               img.onerror = function() {
+                   // Image failed to load
+                   showPlaceholderGraph(regionName);
+               };
+               
+               img.src = imagePath;
+           } else {
+               showPlaceholderGraph(regionName);
+           }
+       }
+
+       function showPlaceholderGraph(regionName) {
+           const graphContent = document.getElementById('graph-content');
+           const expectedFolder = getFolderName(currentTask, currentInteraction, selectedContrast);
+           const expectedContrast = getContrastFileName(currentTask, currentInteraction, selectedContrast);
+           
+           graphContent.innerHTML = `
+               <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
+                   <div style="text-align: center; max-width: 600px;">
+                       
+                       <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 40px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);">
+                           <div style="font-size: 1.2rem; margin-bottom: 15px;">📊 Age-Related ROI Analysis</div>
+                           <div style="opacity: 0.9; margin-bottom: 20px;">Image not found - check file path</div>
+                           <div style="padding: 20px; background: rgba(255,255,255,0.15); border-radius: 12px; font-size: 0.9rem; text-align: left; font-family: monospace;">
+                               <div style="margin-bottom: 10px;"><strong>Expected path:</strong></div>
+                               <div>images/${expectedFolder}/</div>
+                               <div>combined_${currentTask.toLowerCase()}_all_${expectedContrast}_${regionName}.png</div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           `;
+       }
+
+       function closeGraph() {
+           document.getElementById('graph-overlay').style.display = 'none';
+           document.body.style.overflow = 'auto';
+       }
+
+       function goHome() {
+           document.getElementById('task-page').classList.add('hidden');
+           document.getElementById('contrast-page').classList.add('hidden');
+           document.getElementById('home-page').classList.remove('hidden');
+           document.getElementById('home-page').classList.add('fade-in');
+          
+           updateBreadcrumb('<span class="current">Home</span>');
+          
+           currentTask = '';
+           currentInteraction = '';
+           selectedContrast = '';
+       }
+
+       function goBackToTask() {
+           document.getElementById('contrast-page').classList.add('hidden');
+           document.getElementById('task-page').classList.remove('hidden');
+           document.getElementById('task-page').classList.add('fade-in');
+          
+           updateBreadcrumb(`<span onclick="goHome()" style="cursor:pointer;color:#181819;">Home</span> <span>></span> <span class="current">${currentTask}</span>`);
+       }
+
+       function formatRegionName(region) {
+           return region
+               .replace(/_/g, ' ')
+               .replace(/\b\w/g, l => l.toUpperCase())
+               .replace(/And/g, '&')
+               .replace(/-/g, '-');
+       }
+
+       function formatContrastName(contrast) {
+           return contrast
+               .replace(/_/g, ' ')
+               .replace(/\b\w/g, l => l.toUpperCase())
+               .replace(/1$/, '');
+       }
+
+       // Close graph on escape key
+       document.addEventListener('keydown', (e) => {
+           if (e.key === 'Escape') {
+               closeGraph();
+           }
+       });
+
+       // Close graph on background click
+       document.getElementById('graph-overlay').addEventListener('click', (e) => {
+           if (e.target === document.getElementById('graph-overlay')) {
+               closeGraph();
+           }
+       });
+   </script>
+</body>
+</html>
+               '
