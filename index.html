@@ -18608,9 +18608,9 @@ const sexPdsInteractionData = {
 
               // Construct the file path based on your actual naming pattern
               const fileName = `combined_${currentTask}_all_${contrastName}_${regionName}.png`;
-              // Use absolute path for GitHub Pages compatibility
-              const basePath = window.location.pathname.includes('/interaction_gamms/') ? '/interaction_gamms/' : '/';
-              const filePath = `${basePath}images/${folderName}/${fileName}`;
+              // Use appropriate path for GitHub Pages vs local
+              const basePath = window.location.pathname.includes('/interaction_gamms/') ? '/interaction_gamms/' : '';
+              const filePath = basePath ? `${basePath}images/${folderName}/${fileName}` : `images/${folderName}/${fileName}`;
               
               console.log('DEBUG - Task:', currentTask);
               console.log('DEBUG - Interaction:', currentInteraction);
@@ -18977,7 +18977,8 @@ const sexPdsInteractionData = {
            const graphContent = document.getElementById('graph-content');
            const expectedFolder = getFolderName(currentTask, currentInteraction, selectedContrast);
            const expectedContrast = getContrastFileName(currentTask, currentInteraction, selectedContrast);
-           const basePath = window.location.pathname.includes('/interaction_gamms/') ? '/interaction_gamms/' : '/';
+           const basePath = window.location.pathname.includes('/interaction_gamms/') ? '/interaction_gamms/' : '';
+           const displayPath = basePath ? `${basePath}images` : 'images';
            
            graphContent.innerHTML = `
                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
@@ -18988,7 +18989,7 @@ const sexPdsInteractionData = {
                            <div style="opacity: 0.9; margin-bottom: 20px;">Image not found - check file path</div>
                            <div style="padding: 20px; background: rgba(255,255,255,0.15); border-radius: 12px; font-size: 0.9rem; text-align: left; font-family: monospace; word-break: break-all; overflow-wrap: anywhere;">
                                <div style="margin-bottom: 10px;"><strong>Expected path:</strong></div>
-                               <div>${basePath}images/${expectedFolder}/</div>
+                               <div>${displayPath}/${expectedFolder}/</div>
                                <div>combined_${currentTask}_all_${expectedContrast}_${regionName}.png</div>
                            </div>
                        </div>
