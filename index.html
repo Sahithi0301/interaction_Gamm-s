@@ -18606,12 +18606,18 @@ const sexPdsInteractionData = {
                    return null;
                }
 
-               // Construct the file path based on your actual naming pattern
-               const fileName = `combined_${currentTask}_all_${contrastName}_${regionName}.png`;
-               const filePath = `images/${folderName}/${fileName}`;
-               
-               console.log('Looking for image:', fileName);
-               console.log('Full path:', filePath);
+              // Construct the file path based on your actual naming pattern
+              const fileName = `combined_${currentTask}_all_${contrastName}_${regionName}.png`;
+              const filePath = `images/${folderName}/${fileName}`;
+              
+              console.log('DEBUG - Task:', currentTask);
+              console.log('DEBUG - Interaction:', currentInteraction);
+              console.log('DEBUG - Contrast:', selectedContrast);
+              console.log('DEBUG - Region Name:', regionName);
+              console.log('DEBUG - Folder Name:', folderName);
+              console.log('DEBUG - Contrast Name:', contrastName);
+              console.log('DEBUG - Looking for image:', fileName);
+              console.log('DEBUG - Full path:', filePath);
 
                // For web-accessible images, return the path directly
                return filePath;
@@ -18972,12 +18978,12 @@ const sexPdsInteractionData = {
            
            graphContent.innerHTML = `
                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
-                   <div style="text-align: center; max-width: 600px;">
+                   <div style="text-align: center; max-width: 1000px;">
                        
                        <div style="background: linear-gradient(135deg, #3b82f6, #8b5cf6); padding: 40px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);">
                            <div style="font-size: 1.2rem; margin-bottom: 15px;">📊 Age-Related ROI Analysis</div>
                            <div style="opacity: 0.9; margin-bottom: 20px;">Image not found - check file path</div>
-                           <div style="padding: 20px; background: rgba(255,255,255,0.15); border-radius: 12px; font-size: 0.9rem; text-align: left; font-family: monospace;">
+                           <div style="padding: 20px; background: rgba(255,255,255,0.15); border-radius: 12px; font-size: 0.9rem; text-align: left; font-family: monospace; word-break: break-all; overflow-wrap: anywhere;">
                                <div style="margin-bottom: 10px;"><strong>Expected path:</strong></div>
                                <div>images/${expectedFolder}/</div>
                                <div>combined_${currentTask}_all_${expectedContrast}_${regionName}.png</div>
