@@ -18609,9 +18609,18 @@ const sexPdsInteractionData = {
               // Construct the file path based on your actual naming pattern
               const fileName = `combined_${currentTask}_all_${contrastName}_${regionName}.png`;
               // Use appropriate path for GitHub Pages vs local
-              const basePath = window.location.pathname.includes('/interaction_Gamm-s/') ? '/interaction_Gamm-s/' : '';
+              const isGitHubPages = window.location.hostname.includes('github.io');
+              // Get the actual base path from current location
+              const pathSegments = window.location.pathname.split('/').filter(s => s);
+              const repoName = pathSegments.length > 0 ? pathSegments[0] : '';
+              const basePath = isGitHubPages && repoName ? `/${repoName}/` : '';
               const filePath = basePath ? `${basePath}images/${folderName}/${fileName}` : `images/${folderName}/${fileName}`;
               
+              console.log('DEBUG - Hostname:', window.location.hostname);
+              console.log('DEBUG - Pathname:', window.location.pathname);
+              console.log('DEBUG - Is GitHub Pages:', isGitHubPages);
+              console.log('DEBUG - Detected repo name:', repoName);
+              console.log('DEBUG - Base path:', basePath);
               console.log('DEBUG - Task:', currentTask);
               console.log('DEBUG - Interaction:', currentInteraction);
               console.log('DEBUG - Contrast:', selectedContrast);
@@ -18977,7 +18986,10 @@ const sexPdsInteractionData = {
            const graphContent = document.getElementById('graph-content');
            const expectedFolder = getFolderName(currentTask, currentInteraction, selectedContrast);
            const expectedContrast = getContrastFileName(currentTask, currentInteraction, selectedContrast);
-           const basePath = window.location.pathname.includes('/interaction_Gamm-s/') ? '/interaction_Gamm-s/' : '';
+           const isGitHubPages = window.location.hostname.includes('github.io');
+           const pathSegments = window.location.pathname.split('/').filter(s => s);
+           const repoName = pathSegments.length > 0 ? pathSegments[0] : '';
+           const basePath = isGitHubPages && repoName ? `/${repoName}/` : '';
            const displayPath = basePath ? `${basePath}images` : 'images';
            
            graphContent.innerHTML = `
